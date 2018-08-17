@@ -37,7 +37,7 @@ Migrate the database:
 $ php artisan migrate
 ```
 
-Add the `HasPlans` trait to your Eloquent model:
+Add the `Billable` trait to your Eloquent model:
 ```php
 use Rennokki\Chargeswarm\Traits\Billable;
 
