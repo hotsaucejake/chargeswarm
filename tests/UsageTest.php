@@ -2,8 +2,6 @@
 
 namespace Rennokki\Chargeswarm\Test;
 
-use Rennokki\Chargeswarm\SubscriptionBuilder;
-
 class UsageTest extends TestCase
 {
     public function testUsage()

@@ -7,13 +7,13 @@ use Illuminate\Database\Migrations\Migration;
 class Chargeswarm extends Migration
 {
     /**
-     * Create the subscription table
+     * Create the subscription table.
      *
      * @return void
      */
     public function up()
     {
-        Schema::create('chargebee_subscriptions', function($table) {
+        Schema::create('chargebee_subscriptions', function ($table) {
             $table->increments('id');
             $table->string('subscription_id');
             $table->string('plan_id');

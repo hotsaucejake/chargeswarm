@@ -2,8 +2,6 @@
 
 namespace Rennokki\Chargeswarm\Test;
 
-use Rennokki\Chargeswarm\SubscriptionBuilder;
-
 use Carbon\Carbon;
 
 class SubscriptionTest extends TestCase

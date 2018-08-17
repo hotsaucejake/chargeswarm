@@ -3,10 +3,9 @@
 namespace Rennokki\Chargeswarm\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Rennokki\Chargeswarm\SubscriptionBuilder;
 
-class SubscriptionUsage extends Model {
-
+class SubscriptionUsage extends Model
+{
     protected $table = 'chargebee_subscriptions_usages';
     protected $guarded = [];
     protected $casts = [

@@ -1,4 +1,5 @@
 <?php
+
 namespace Rennokki\Chargeswarm;
 
 use ChargeBee_Environment as ChargebeeEnvironment;
@@ -85,7 +86,7 @@ class SubscriptionBuilder
     }
 
     /**
-     * Add billing details
+     * Add billing details.
      *
      * @param string $email
      * @param string $firstName
