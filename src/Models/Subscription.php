@@ -28,6 +28,11 @@ class Subscription extends Model
         return $this->hasMany(config('chargeswarm.models.subscriptionUsage'), 'subscription_id');
     }
 
+    public function scopeSubscriptionId($query, string $subscriptionId)
+    {
+        return $query->where('subscription_id', $subscriptionId);
+    }
+
     /**
      * Swap the current subscription to a new plan.
      *
@@ -38,7 +43,7 @@ class Subscription extends Model
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if (! $this->active() || ! $this->onTrial()) {
+        if (! $this->active()) {
             return false;
         }
 
@@ -105,7 +110,7 @@ class Subscription extends Model
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if (! $this->active() || ! $this->onTrial()) {
+        if (! $this->active()) {
             return false;
         }
 
