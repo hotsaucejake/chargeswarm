@@ -3,13 +3,11 @@
 namespace Rennokki\Chargeswarm\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Rennokki\Chargeswarm\SubscriptionBuilder;
-
 use ChargeBee_Environment as ChargebeeEnvironment;
 use ChargeBee_Subscription as ChargebeeSubscription;
 
-class Subscription extends Model {
-
+class Subscription extends Model
+{
     protected $table = 'chargebee_subscriptions';
     protected $guarded = [];
     protected $dates = [
@@ -40,7 +38,7 @@ class Subscription extends Model {
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if(! $this->active() || ! $this->onTrial()) {
+        if (! $this->active() || ! $this->onTrial()) {
             return false;
         }
 
@@ -99,7 +97,7 @@ class Subscription extends Model {
     }
 
     /**
-     * Cancel without any other way of reactivating (if it has trial)
+     * Cancel without any other way of reactivating (if it has trial).
      *
      * @return bool|\Rennokki\Chargeswarm\Models\Subscription
      */
@@ -169,7 +167,7 @@ class Subscription extends Model {
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if(! $subscription->cancelled()) {
+        if (! $subscription->cancelled()) {
             return false;
         }
 
@@ -199,7 +197,7 @@ class Subscription extends Model {
      */
     public function cancelled()
     {
-        return (bool) !is_null($this->ends_at);
+        return (bool) ! is_null($this->ends_at);
     }
 
     /**
@@ -276,9 +274,10 @@ class Subscription extends Model {
     {
         $usage = $this->usages()->metadata($metadataId)->first();
 
-        if (!$usage || $usage->remaining() < $amount) {
+        if (! $usage || $usage->remaining() < $amount) {
             return false;
         }
+
         return (bool) $usage->increment('used', $amount);
     }
 
@@ -293,7 +292,7 @@ class Subscription extends Model {
     {
         $usage = $this->usages()->metadata($metadataId)->first();
 
-        if (!$usage) {
+        if (! $usage) {
             return false;
         }
 
