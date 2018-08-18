@@ -151,25 +151,6 @@ By default, `handleSubscriptionCancelled`, `handlePaymentSucceeded`, `handleSubs
 
 For these four, instead, i recommend listening their **paired events** to handle your own logic. In case you want to implement any other handler, you are free to do it by extending the controller, but remember that events associated with the hooks are also triggered.
 
-# Customizing webhooks
-You can customize any kind of method in your controller that follows the following rule:
-```
-MyController@handle{EventNameInStudlyCase}($payload, $storedSubscription, $subscription)
-```
-
-For example, since `card_added` Chargebee event is not pre-defined nor added, you can simply add this method in your controller:
-```php
-public function handleCardAdded($payload, $storedSubscription, $subscription)
-{
-    // your logic here
-    // only $payload is not null.
-    // The rest of the variables injected can be null or not, if the 
-    // subscription object exists
-}
-```
-
-All controller methods and events accept 3 parameters: `$payload`, `$storedSubscription` and `$subscription`.
-
 # Extending the Controller
 Customizing webhooks can be done simply by extending your controller from `Rennokki\Chargeswarm\Http\Controllers\ChargebeeWebhookController`:
 ```php
@@ -190,6 +171,25 @@ After extending it, make sure you are using your controller with the same `@hand
 ```php
 Route::post('/webhooks/chargebee', 'MyController@handleWebhook');
 ```
+
+# Customizing webhooks
+You can customize any kind of method in your controller that follows the following rule:
+```
+MyController@handle{EventNameInStudlyCase}($payload, $storedSubscription, $subscription)
+```
+
+For example, since `card_added` Chargebee event is not pre-defined nor added, you can simply add this method in your controller:
+```php
+public function handleCardAdded($payload, $storedSubscription, $subscription)
+{
+    // your logic here
+    // only $payload is not null.
+    // The rest of the variables injected can be null or not, if the 
+    // subscription object exists
+}
+```
+
+All controller methods and events accept 3 parameters: `$payload`, `$storedSubscription` and `$subscription`.
 
 # Events
 As stated earlier, the `\Rennokki\Chargeswarm\Events\WebhookReceived` event fires automatically. In addition to that, [each of the listed method here automatically fires the paired event](webhooks.md).
