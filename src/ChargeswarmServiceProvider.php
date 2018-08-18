@@ -15,7 +15,7 @@ class ChargeswarmServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__.'/../config/chargeswarm.php' => config_path('chargeswarm.php'),
-            __DIR__.'/../database/migrations/2018_06_07_123211_chargeswarm.php' => database_path('migrations/2018_06_07_123211_chargeswarm.php'),
+            __DIR__.'/../database/migrations/2017_10_12_200000_chargeswarm.php' => database_path('migrations/2017_10_12_200000_chargeswarm.php'),
         ], 'config');
     }
 

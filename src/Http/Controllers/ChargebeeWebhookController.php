@@ -15,14 +15,17 @@ class ChargebeeWebhookController extends Controller
      */
     public function handleWebhook(Request $request)
     {
-        $data = json_decode(file_get_contents('php://input'));
-        $event = studly_case($data->event_type);
+        $payload = json_decode(file_get_contents('php://input'));
+        $event = studly_case($payload->event_type);
 
-        $payload = json_decode(json_encode($request->input('content')));
-        $subscription = $this->content->subscription;
+        $subscription = optional($payload->content)->subscription;
+        $storedSubscription = null;
 
         $subscriptionModel = config('chargeswarm.models.subscription');
-        $storedSubscription = $subscriptionModel::subscriptionId($payload->content->subscription);
+
+        if ($subscription) {
+            $storedSubscription = $subscriptionModel::subscriptionId($subscription->id);
+        }
 
         $eventClass = '\Rennokki\Chargeswarm\Events\/'.$event;
 
@@ -30,10 +33,10 @@ class ChargebeeWebhookController extends Controller
             event(new $eventClass($payload, $storedSubscription, $subscription));
         }
 
-        event(new \Rennoki\Chargeswarm\Events\WebhookReceived($payload));
+        event(new \Rennokki\Chargeswarm\Events\WebhookReceived($payload));
 
         if (method_exists($this, 'handle'.$event)) {
-            $this->handle[$event]($payload, $storedSubscription, $subscription);
+            $this->{ 'handle'.$event}($payload, $storedSubscription, $subscription);
         }
 
         return response('The webhook was handled for '.$request->event_type, 200);

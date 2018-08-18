@@ -9,12 +9,12 @@
 [![PayPal](https://img.shields.io/badge/PayPal-donate-blue.svg)](https://paypal.me/rennokki)
 
 # Laravel Chargeswarm
-Laravel Chargeswarm is a Laravel wrapper for the Chargebee service's API. Chargebee is a service that helps you with tracking subscriptions, issuing invoices for your services and any other SaaS-like activity. This package wraps around the Subscription endpoints that helps you manage easy your plans and subscriptions and also gives you an easy, basic, setup to track countable features for your plans.
+Laravel Chargeswarm is a Laravel Cashier-alike package that will help you befriend the bees and have a great SaaS system for your app. This package provides methods to create, update, cancel or resume subscriptions and also to handle the webhooks in style!
 
 # Advantages of Chargebee
-Chargebee does not act as a payment provider that also handles subscriptions, but also helps you install a payment Gateway such as Stripe or Braintree and then use the API to provide an easy access to a SaaS manager.
+Chargebee is not a payment provider. In fact, Chargebee is a manager for SaaS, while you can use any kind of payment gateway. The same as Stripe, you can fully use features like [Chargebee's metadata](https://www.chargebee.com/docs/metadata.html) to carry out information for your plans.
 
-While you can use [Chargebee's metadata](https://www.chargebee.com/docs/metadata.html) to carry out information for your plans, this package also provides support to track `countable features` for your plans. This feature will be exaplained later in-depth. 
+This package also supports tracking consumption for countable features. Stay tuned until the end of the documentation to know what's all about.
 
 # Installation
 Install the package:
@@ -49,8 +49,8 @@ class User extends Model {
 
 Do not forget to add your site & your API key, as well as the gateway option in your `.env` file:
 ```
-CHARGEBEE_SITE=test-renoki
-CHARGEBEE_KEY=sk_test_...
+CHARGEBEE_SITE=site-test
+CHARGEBEE_KEY=test_...
 CHARGEBEE_GATEWAY=stripe
 ```
 
@@ -65,6 +65,7 @@ $subscription = $user->subscription('plan_id')
                      ->billingCycles(12)
                      ->withQuantity(3)
                      ->create('stripe_or_braintree_token');
+
 $user->subscribed('plan_id'); // true
 $user->activeSubscriptions()->count(); // 1
 ```
@@ -98,13 +99,13 @@ $subscription = $subscription->swap('new_plan_id'); // updated subscription
 ```
 
 # Cancelling & Resuming subscriptions
-Most of the plans are in trial. If you plan to cancel a subscription, you can do so using the `cancel()` method. However, if the subscription is not expired (the expiration date did not pass), it will still be available, but it would be marked as cancelled. It can later be resumed, if the user is deciding to go on.
+You can set your plans to be on trial. If you plan to cancel a subscription, you can do so using the `cancel()` method. However, if the subscription is not expired (the expiration date did not pass), it will still be available through the trial, but it would be marked as cancelled.
 ```php
 $subscripton->cancel();
 $subscription->cancelled(); // true
 ```
 
-If the user decides to resume the subscription, it can do so:
+It can later be resumed, if the user decides to go on with the subscription:
 ```php
 $subscription->resume();
 $subscription->active(); // true
@@ -118,18 +119,16 @@ $subscription->active(); // false
 $subscription->onTrial(); // false
 ```
 
-However, the cancelled subscription can be `reactivated`:
+However, the cancelled subscription can be `reactivated` instead of `resumed`:
 ```php
 $subscription->reactivate();
 $subscription->active(); // true
 ```
 
-# Webhooks & Events
-The most used feature encountered is the Webhook. Anytime something happens, Chargebee will send a `POST` request to a configured webhook. Fortunately, Chargeswarm can do this for you and has a ton of support when it comes to webhooks & events.
+# Webhooks
+Anytime something happens, Chargebee will send a `POST` request to a configured webhook. Fortunately, Chargeswarm can do this for you and has a ton of support when it comes to webhooks.
 
-If you are not familiar with Laravel Events, check out the [Official Laravel Documentation on Events](https://laravel.com/docs/5.6/events)
-
-Getting started - all you have to do is to declare a route like this in your `routes/web.php` or `routes/api.php` file:
+To handle all Chargebee's webhooks automatically, all you have to do is to declare a route like this in your `routes/web.php` or `routes/api.php` file with the following controller:
 ```php
 Route::post('/webhooks/chargebee', '\Rennokki\Chargeswarm\Http\Controllers\ChargebeeWebhookController@handleWebhook');
 ```
@@ -141,17 +140,46 @@ protected $except = [
 ];
 ```
 
-Currently, there are **23** events that can be configured simply by extending the previously used controller and implementing your own logic.
-By default, `handleSubscriptionCancelled`, `handlePaymentSucceeded`, `handleSubscriptionDeleted` and `handleSubscriptionRenewed` automatically do the logic for your plans. I recommend **NOT** overwriting these unless you know what you do. For these four, use their **paired events** to handle your own logic. In case you want to implement any other handler, you are free to do it by extending the controller, but remember that events associated with the hooks are also triggered.
+# Pre-defined webhooks
+There are 23 events & pre-defined webhooks, but you can extend it using [any of the Chargebee's events](https://apidocs.chargebee.com/docs/api/events#event_types) due to friendly syntax that will be explained later. Each time a webhook fires, no matter the event, you will receive a `\Rennokki\Chargeswarm\Events\WebhookReceived` event that carries out as variable an `$event->payload` JSON object.
+
+Additionally, for these 23 pre-defined webhooks, you will also receive a specific event. You can find a list of [pre-defined webhooks and their paired events here](webhooks.md).
+
+Unfortunately, for any other class method you declare, other than those defined earlier, you will not receive events. The only event that triggers is the `\Rennokki\Chargeswarm\Events\WebhookReceived` event, which triggers automatically on each webhook received.
+
+By default, `handleSubscriptionCancelled`, `handlePaymentSucceeded`, `handleSubscriptionDeleted` and `handleSubscriptionRenewed` automatically do the logic for your plans. I recommend **NOT** overwriting these unless you know what you do.
+
+For these four, instead, i recommend listening their **paired events** to handle your own logic. In case you want to implement any other handler, you are free to do it by extending the controller, but remember that events associated with the hooks are also triggered.
+
+# Customizing webhooks
+You can customize any kind of method in your controller that follows the following rule:
+```
+MyController@handle{EventNameInStudlyCase}($payload, $storedSubscription, $subscription)
+```
+
+For example, since `card_added` Chargebee event is not pre-defined nor added, you can simply add this method in your controller:
+```php
+public function handleCardAdded($payload, $storedSubscription, $subscription)
+{
+    // your logic here
+    // only $payload is not null, but it depends
+}
+```
+
+All controller methods and events accept 3 parameters: `$payload`, `$storedSubscription` and `$subscription`.
+
+# Extending the Controller
+Customizing webhooks can be done simply by extending your controller from `Rennokki\Chargeswarm\Http\Controllers\ChargebeeWebhookController`:
 ```php
 use Rennokki\Chargeswarm\Http\Controllers\ChargebeeWebhookController;
 
-class MyController extends ChargebeeWebhookController {
+class MyController extends ChargebeeWebhookController
+{
     public function handleSubscriptionResumed($payload, $storedSubscription, $subscription)
     {
         // $payload is the JSON Object with the request
         // $storedSubscription is the stored subscription (if any)
-        // $subscription is the subscription data (equivalent of $payload->content->subscription
+        // $subscription is the subscription data (equivalent of $payload->content->subscription), if any
     }
 }
 ```
@@ -161,67 +189,57 @@ After extending it, make sure you are using your controller with the same `@hand
 Route::post('/webhooks/chargebee', 'MyController@handleWebhook');
 ```
 
-These are all available methods that are called via the webhook with their pair events. The ones marked with the asterisk* are already implemented and should **NOT** be overwritten (unless you know what you are doing).
+# Events
+As stated earlier, the `\Rennokki\Chargeswarm\Events\WebhookReceived` event fires automatically. In addition to that, [each of the listed method here automatically fires the paired event](webhooks.md).
 
-All methods and events accept 3 parameters: `$payload`, `$storedSubscription` and `$subscription`. All of them are explained in the previous example with Controller extension.
+If you are not familiar with events, [check Laravel's Official Documentation on Events](https://laravel.com/docs/5.6/events) that teaches you what are events, how to handle them and, more important, how to listen to them.
 
-**Since there are **23** events and applied webhooks, the whole table with all webhooks and paired events can be found [in the webhooks.md file](webhooks.md).**
+All events send 3 parameters to their listeners: `$payload`, `$storedSubscription` and `$subscription`. They can be accessed in your listener using the event instance.
 
-For example, if you implement your own `@handleSubscriptionResumed` like before, by extending the provided controller in `MyController`, every time the `handleSubscriptionResumed` method is called by the webhook, the paired `\Rennokki\Chargeswarm\Events\SubscriptionResumed` event will fire and you can attach your own listeners and run your logic.
-
-For customizability, the `\Rennokki\Chargeswarm\Events\WebhookReceived` event is launched every time Chargebee hits the webhook and accepts only one parameter which is `payload` and a listener can easily do the job for you:
+For example, each time the `@handleSubscriptionResumed` is called, we can listen to the `\Rennokki\Chargeswarm\Events\SubscriptionResumed` event and implement our logic:
 ```php
-...
-public function handle(WebhookReceived $event)
-{
-    $payload = $event->payload;
-    $subscription = $payload->content->subscription;
-    
-    if ($subscription) {
-        ...
-    }
-}
-```
-
-# Other Chargebee Webhook events
-Chargeswarm implements only 23 webhook handlers. [There are many more events that can be used](https://apidocs.chargebee.com/docs/api/events#event_types), and each of the Chargebee event follows one simple rule.
-
-For example, for `card_added` event, your controller method can be `handleCardAdded($payload, $localSubscription, $subscription)`.
-
-Unfortunately, no events are triggered and even if `$localSubscription` and `$subscription` can be `null`, you have to declare them.
-
-```php
-class MyController extends ChargebeeWebhookController {
-    public function handleCardAdded($payload, $storedSubscription, $subscription)
+class MyListener {
+    public function handle(SubscriptionResumed $event)
     {
-        // $storedSubscription and $subscription are null
+        // $event->payload
+        // $event->storedSubscription
+        // $event->subscription
     }
 }
 ```
 
 # Countable features
-In apps that heavily use a SaaS system, you will often see that the greater the price is, the more features you get. In some cases, you will find out that with higher plans, you get access to new modules of the app. In this particular case, you can have, for example, countable features.
+Let's say you run your own newsletters app that bills users using SaaS and you give your users `5.000` newsletters, monthly, that they can send.
 
-Let's say you run your own app that is billed using SaaS and you give your users `5.000` newsletters they can send.
-
-On subscribing or after the subscription renews, you can simply call `createUsage()` from the subscription:
+On subscribing or after the subscription renews (which can be done by listening to the `\Rennokki\Chargeswarm\Events\SubscriptionRenewed` event), you can simply call `createUsage()` in your logic, for example:
 ```php
-$subscription->createUsage('monthly.emails', 5000);
+public function handle()
+{
+    $subscription = $event->storedSubscription;
+    $subscription->createUsage('monthly.emails', 5000);
+    
+    ...
+}
 ```
 
-Later, you can `consume` or `unconsume` them all around your app:
+Later, you can `consume` or `unconsume` them all around your app by calling the methods within the subscription:
 ```php
-$subscription->consume('montly.emails', 10); // sent 10 mails
+$subscription->consume('monthly.emails', 10); // sent 10 mails
 ```
 
-If you had problems with your servers and the mails were not sent, but the user claims it still has 10 less mails in their montly quota, you can undo this action:
+Reversing the effect can be useful in cases with errors, for example. When the mailserver fails, but your app doesn't. To reverse it, you can unconsume it:
 ```php
 $subscription->unconsume('monthly.emails', 10); // undo-ed 10 from the quota
 ```
 
-Consuming or unconsuming inexistent usages, you will get `false`:
+Consuming or unconsuming inexistent, unset, usages will give you a `false`. Also, if the amount consumed is higher than the one remaining, you will also get a `false`.
 ```php
 $subscription->consume('daily.emails', 10); // false
 ```
 
-**Keep in mind: if you consume more than you have left you get also `false` and if you unconsume until it drops below 0, it will not go to negative values.**
+Unconsuming does not falls below zero. If you unconsume more than you have used, the overflow won't hit and the `used` attribute will be set to 0.
+
+If you plan receiving all the usages, you can do so by calling the `usages()` relationship within the subscription:
+```php
+$usages = $subscription->usages()->get();
+```
