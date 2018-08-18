@@ -162,7 +162,9 @@ For example, since `card_added` Chargebee event is not pre-defined nor added, yo
 public function handleCardAdded($payload, $storedSubscription, $subscription)
 {
     // your logic here
-    // only $payload is not null, but it depends
+    // only $payload is not null.
+    // The rest of the variables injected can be null or not, if the 
+    // subscription object exists
 }
 ```
 
