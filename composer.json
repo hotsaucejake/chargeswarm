@@ -1,6 +1,6 @@
 {
     "name": "rennokki/chargeswarm",
-    "description": "Chargeswarm is a Laravel package to handle subscriptions using the Chargebee service.",
+    "description": "Chargeswarm is a Laravel package that helps you handling subscriptions using the Chargebee service.",
     "keywords": [
         "eloquent",
         "laravel",
