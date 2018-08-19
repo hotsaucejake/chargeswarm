@@ -3,10 +3,11 @@
 | @handleWebhook*                                 | \Rennokki\Chargeswarm\Events\WebhookReceived::class                          |
 | @handlePaymentFailed                            | \Rennokki\Chargeswarm\Events\PaymentFailed::class                            |
 | @handlePaymentSucceeded*                        | \Rennokki\Chargeswarm\Events\PaymentSucceeded::class                         |
+| @handlePaymentRefunded*                         | \Rennokki\Chargeswarm\Events\PaymentRefunded::class                          |
 | @handleSubscriptionActivated                    | \Rennokki\Chargeswarm\Events\SubscriptionActivated::class                    |
+| @handleSubscriptionCancelled*                   | \Rennokki\Chargeswarm\Events\SubscriptionCancelled::class                    |
 | @handleSubscriptionCancellationReminder         | \Rennokki\Chargeswarm\Events\SubscriptionCancellationReminder::class         |
 | @handleSubscriptionCancellationScheduled        | \Rennokki\Chargeswarm\Events\SubscriptionCancellationScheduled::class        |
-| @handleSubscriptionCancelled*                   | \Rennokki\Chargeswarm\Events\SubscriptionCancelled::class                    |
 | @handleSubscriptionChanged                      | \Rennokki\Chargeswarm\Events\SubscriptionChanged::class                      |
 | @handleSubscriptionChangesScheduled             | \Rennokki\Chargeswarm\Events\SubscriptionChangesScheduled::class             |
 | @handleSubscriptionCreated                      | \Rennokki\Chargeswarm\Events\SubscriptionCreated::class                      |
@@ -23,3 +24,6 @@
 | @handleSubscriptionShippingAddressUpdated       | \Rennokki\Chargeswarm\Events\SubscriptionShippingAddressUpdated::class       |
 | @handleSubscriptionStarted                      | \Rennokki\Chargeswarm\Events\SubscriptionStarted::class                      |
 | @handleSubscriptionTrialEndReminder             | \Rennokki\Chargeswarm\Events\SubscriptionTrialEndReminder::class             |
+| @handleInvoiceGenerated*                        | \Rennokki\Chargeswarm\Events\InvoiceGenerated::class                         |
+| @handlePendingInvoiceCreated*                   | \Rennokki\Chargeswarm\Events\PendingInvoiceCreated::class                    |
+| @handleInvoiceDeleted*                          | \Rennokki\Chargeswarm\Events\InvoiceDeleted::class                           |

@@ -141,13 +141,21 @@ protected $except = [
 ```
 
 # Pre-defined webhooks
-There are 23 events & pre-defined webhooks, but you can extend it using [any of the Chargebee's events](https://apidocs.chargebee.com/docs/api/events#event_types) due to friendly syntax that will be explained later. Each time a webhook fires, no matter the event, you will receive a `\Rennokki\Chargeswarm\Events\WebhookReceived` event that carries out as variable an `$event->payload` JSON object.
+There are 27 events & pre-defined webhooks, but you can extend it using [any of the Chargebee's events](https://apidocs.chargebee.com/docs/api/events#event_types) due to friendly syntax that will be explained later. Each time a webhook fires, no matter the event, you will receive a `\Rennokki\Chargeswarm\Events\WebhookReceived` event that carries out as variable an `$event->payload` JSON object.
 
 Additionally, for these 23 pre-defined webhooks, you will also receive a specific event. You can find a list of [pre-defined webhooks and their paired events here](webhooks.md).
 
 Unfortunately, for any other class method you declare, other than those defined earlier, you will not receive events. The only event that triggers is the `\Rennokki\Chargeswarm\Events\WebhookReceived` event, which triggers automatically on each webhook received.
 
-By default, `handleSubscriptionCancelled`, `handlePaymentSucceeded`, `handleSubscriptionDeleted` and `handleSubscriptionRenewed` automatically do the logic for your plans. I recommend **NOT** overwriting these unless you know what you do.
+By default, the following controller methods automatically do the logic for your plans. I recommend **NOT** overwriting these unless you know what you do:
+* `handleSubscriptionCancelled`
+* `handlePaymentSucceeded`
+* `handlePaymentRefunded`
+* `handleSubscriptionDeleted`
+* `handleSubscriptionRenewed`
+* `handleInvoiceGenerated`
+* `handleInvoiceCreated`
+* `handleInvoiceDeleted`
 
 For these four, instead, i recommend listening their **paired events** to handle your own logic. In case you want to implement any other handler, you are free to do it by extending the controller, but remember that events associated with the hooks are also triggered.
 

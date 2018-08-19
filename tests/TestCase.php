@@ -3,6 +3,7 @@
 namespace Rennokki\Chargeswarm\Test;
 
 use Rennokki\Plans\Test\Models\User;
+use Rennokki\Chargeswarm\Models\Invoice;
 use Rennokki\Chargeswarm\Models\Subscription;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Rennokki\Chargeswarm\Models\SubscriptionUsage;
@@ -40,6 +41,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('app.key', 'wslxrEFGWY6GfGhvN9L3wH3KSRJQQpBD');
         $app['config']->set('chargeswarm.models.subscription', Subscription::class);
         $app['config']->set('chargeswarm.models.subscriptionUsage', SubscriptionUsage::class);
+        $app['config']->set('chargeswarm.models.invoice', Invoice::class);
     }
 
     protected function resetDatabase()

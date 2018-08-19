@@ -11,6 +11,45 @@ trait Billable
         return $this->morphMany(config('chargeswarm.models.subscription'), 'model');
     }
 
+    public function invoices()
+    {
+        return $this->morphMany(config('chargeswarm.models.invoice'), 'model');
+    }
+
+    /**
+     * Get the the invoice, if any.
+     *
+     * @param string $invoiceId
+     * @return null|Chargebee_Invoice
+     */
+    public function retrieveInvoice(string $invoiceId)
+    {
+        $invoice = $this->invoices()->find($invoiceId);
+
+        if (! $invoice) {
+            return;
+        }
+
+        return $invoice->retrieve();
+    }
+
+    /**
+     * Get the download link of the invoice, if any.
+     *
+     * @param string $invoiceId
+     * @return null|Chargebee_Download
+     */
+    public function downloadLinkForInvoice(string $invoiceId)
+    {
+        $invoice = $this->invoices()->find($invoiceId);
+
+        if (! $invoice) {
+            return;
+        }
+
+        return $invoice->downloadLink();
+    }
+
     /**
      * Start building a new subscription.
      *

@@ -13,9 +13,8 @@ class Chargeswarm extends Migration
      */
     public function up()
     {
-        Schema::create('chargebee_subscriptions', function ($table) {
-            $table->increments('id');
-            $table->string('subscription_id');
+        Schema::create('chargebee_subscriptions', function (Blueprint $table) {
+            $table->string('id')->primary();
             $table->string('plan_id');
             $table->integer('model_id');
             $table->string('model_type');
@@ -41,6 +40,14 @@ class Chargeswarm extends Migration
             $table->float('total', 9, 2)->default(0);
             $table->timestamps();
         });
+
+        Schema::create('chargebee_invoices', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('subscription_id')->nullable();
+            $table->integer('model_id')->nullable();
+            $table->string('model_type')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -52,5 +59,6 @@ class Chargeswarm extends Migration
     {
         Schema::dropIfExists('chargebee_subscriptions');
         Schema::dropIfExists('chargebee_subscriptions_usages');
+        Schema::dropIfExists('chargebee_invoices');
     }
 }

@@ -12,7 +12,7 @@ class UsageTest extends TestCase
              ->withCustomerData('a@b.com', 'First Name', 'Last Name')
              ->withBilling('a@c.com', 'First', 'Last', 'Address', 'City', 'State', null, 'RO', 'Company')
              ->billingCycles(12)
-             ->create('fake-valid-visa-nonce');
+             ->create('tok_visa');
 
         $subscription = $user->activeSubscriptions()->first();
 

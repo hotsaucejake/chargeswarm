@@ -166,9 +166,10 @@ class SubscriptionBuilder
 
         $subscription = $result->subscription();
         $card = $result->card();
+        $invoice = $result->invoice();
 
-        return $this->model->subscriptions()->create([
-            'subscription_id' => $subscription->id,
+        $storedSubscription = $this->model->subscriptions()->create([
+            'id' => $subscription->id,
             'plan_id' => $subscription->planId,
             'billing_period' => $subscription->billingPeriod,
             'billing_period_unit' => $subscription->billingPeriodUnit,
@@ -181,6 +182,19 @@ class SubscriptionBuilder
             'status' => $subscription->status,
             'last_four' => ($card) ? $card->last4 : null,
         ]);
+
+        if ($invoice) {
+            $storedInvoice = $this->model->invoices()->find($invoice->id);
+
+            if (! $storedInvoice) {
+                $storedInvoice = $this->model->invoices()->create([
+                    'id' => $invoice->id,
+                    'subscription_id' => $subscription->id,
+                ]);
+            }
+        }
+
+        return $storedSubscription;
     }
 
     /**

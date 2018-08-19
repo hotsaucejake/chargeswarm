@@ -2,6 +2,7 @@
 
 namespace Rennokki\Chargeswarm\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use ChargeBee_Environment as ChargebeeEnvironment;
 use ChargeBee_Subscription as ChargebeeSubscription;
@@ -17,6 +18,7 @@ class Subscription extends Model
         'trial_ends_at',
         'next_billing_at',
     ];
+    public $incrementing = false;
 
     public function model()
     {
@@ -28,9 +30,9 @@ class Subscription extends Model
         return $this->hasMany(config('chargeswarm.models.subscriptionUsage'), 'subscription_id');
     }
 
-    public function scopeSubscriptionId($query, string $subscriptionId)
+    public function invoices()
     {
-        return $query->where('subscription_id', $subscriptionId);
+        return $this->hasMany(config('chargeswarm.models.invoice'), 'subscription_id');
     }
 
     /**
@@ -47,7 +49,7 @@ class Subscription extends Model
             return false;
         }
 
-        $subscription = ChargebeeSubscription::update($this->subscription_id, [
+        $subscription = ChargebeeSubscription::update($this->id, [
             'planId' => $planId,
         ])->subscription();
 
@@ -80,7 +82,7 @@ class Subscription extends Model
             return false;
         }
 
-        $subscription = ChargebeeSubscription::cancel($this->subscription_id, [
+        $subscription = ChargebeeSubscription::cancel($this->id, [
             'endOfTerm' => true,
         ])->subscription();
 
@@ -114,7 +116,7 @@ class Subscription extends Model
             return false;
         }
 
-        $subscription = ChargebeeSubscription::cancel($this->subscription_id, [
+        $subscription = ChargebeeSubscription::cancel($this->id, [
             'endOfTerm' => false,
         ])->subscription();
 
@@ -126,9 +128,7 @@ class Subscription extends Model
             'plan_free_quantity' => $subscription->planFreeQuantity,
             'starts_at' => $subscription->startedAt,
             'ends_at' => $subscription->cancelledAt,
-            'trial_starts_at' => $subscription->trialStart,
             'trial_ends_at' => $subscription->cancelledAt,
-            'next_billing_at' => $subscription->nextBillingAt,
             'status' => $subscription->status,
         ]);
 
@@ -144,7 +144,7 @@ class Subscription extends Model
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        $subscription = ChargebeeSubscription::removeScheduledCancellation($this->subscription_id)->subscription();
+        $subscription = ChargebeeSubscription::removeScheduledCancellation($this->id)->subscription();
 
         $this->update([
             'plan_id' => $subscription->planId,
@@ -172,11 +172,11 @@ class Subscription extends Model
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if (! $subscription->cancelled()) {
+        if (! $this->cancelled()) {
             return false;
         }
 
-        $subscription = ChargebeeSubscription::reactivate($subscription->subscription_id)->subscription();
+        $subscription = ChargebeeSubscription::reactivate($this->id)->subscription();
 
         $this->update([
             'plan_id' => $subscription->planId,
@@ -227,7 +227,7 @@ class Subscription extends Model
     public function onTrial()
     {
         if (! is_null($this->trial_ends_at)) {
-            return now()->lt($this->trial_ends_at);
+            return Carbon::now()->addSecond()->lte(Carbon::parse($this->trial_ends_at));
         }
 
         return false;
@@ -244,7 +244,7 @@ class Subscription extends Model
             return true;
         }
 
-        return now()->lt($this->ends_at);
+        return Carbon::now()->addSecond()->lte(Carbon::parse($this->ends_at));
     }
 
     /**
