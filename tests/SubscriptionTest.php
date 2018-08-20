@@ -5,6 +5,7 @@ namespace Rennokki\Chargeswarm\Test;
 use Carbon\Carbon;
 use Chargebee_Invoice as ChargebeeInvoice;
 use Chargebee_Download as ChargebeeDownload;
+use Chargebee_ListResult as ChargebeeListResult;
 use Chargebee_InvalidRequestException as ChargebeeInvalidRequestException;
 
 class SubscriptionTest extends TestCase
@@ -17,6 +18,7 @@ class SubscriptionTest extends TestCase
              ->withCustomerData('a@b.com', 'First Name', 'Last Name')
              ->withBilling('a@c.com', 'First', 'Last', 'Address', 'City', 'State', null, 'RO', 'Company')
              ->billingCycles(12)
+             ->startsOn(Carbon::now())
              ->create('tok_visa');
 
         $this->assertTrue($user->subscribed('cbdemo_hustle'));
@@ -65,6 +67,9 @@ class SubscriptionTest extends TestCase
              ->withCustomerData('a@b.com', 'First Name', 'Last Name')
              ->withBilling('a@c.com', 'First', 'Last', 'Address', 'City', 'State', null, 'RO', 'Company')
              ->billingCycles(12)
+             ->startsOn(Carbon::now())
+             ->onTrial()
+             ->trialEndsOn(Carbon::now()->addDays(14))
              ->create('tok_visa');
 
         $this->assertTrue($user->subscribed('cbdemo_grow'));
@@ -124,7 +129,16 @@ class SubscriptionTest extends TestCase
         $subscription->swap('cbdemo_grow');
         $subscription->refresh();
 
+        $subscription->updateBillingCycles(13);
+        $subscription->refresh();
+
         $this->assertEquals($subscription->plan_id, 'cbdemo_grow');
+
+        $subscription->changeTrialEnd(0);
+
+        $subscription->refresh();
+        $this->assertFalse($subscription->onTrial());
+        $this->assertTrue($subscription->active());
     }
 
     public function testSwapToPaid()
@@ -148,7 +162,14 @@ class SubscriptionTest extends TestCase
         $subscription->swap('cbdemo_hustle');
         $subscription->refresh();
 
+        $subscription->updateBillingCycles(13);
+        $subscription->refresh();
         $this->assertEquals($subscription->plan_id, 'cbdemo_hustle');
+
+        $subscription->changeTermEnd(Carbon::tomorrow());
+        $subscription->refresh();
+        $this->assertFalse($subscription->onTrial());
+        $this->assertTrue($subscription->active());
     }
 
     public function testCoupon()
@@ -201,10 +222,17 @@ class SubscriptionTest extends TestCase
         $subscription = $activeSubscriptions->first();
         $invoices = $subscription->invoices();
 
-        $this->assertTrue(is_array($invoices));
-        $this->assertEquals(count($invoices), 1);
+        $this->assertInstanceOf(ChargebeeListResult::class, $invoices);
+        $this->assertEquals($invoices->count(), 1);
 
-        $invoice = $invoices[0];
+        $invoices = $user->invoices($subscription->id);
+
+        $this->assertInstanceOf(ChargebeeListResult::class, $invoices);
+        $this->assertEquals($invoices->count(), 1);
+
+        foreach ($invoices as $invoice) {
+            $invoice = $invoice->invoice();
+        }
 
         $this->assertInstanceOf(ChargebeeInvoice::class, $user->invoice($invoice->id));
         $this->assertInstanceOf(ChargebeeDownload::class, $user->downloadInvoice($invoice->id));

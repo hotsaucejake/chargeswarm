@@ -64,6 +64,10 @@ $subscription = $user->subscription('plan_id')
                      ->withAddons(['addon1', 'addon2'])
                      ->billingCycles(12)
                      ->withQuantity(3)
+                     ->startsOn(...) // date or Carbon
+                     ->onTrial() // overwrites the trial
+                     ->trialEndsOn(...) // date or Carbon
+                     ->withInvoiceNotes(...)
                      ->create('stripe_or_braintree_token');
 
 $user->subscribed('plan_id'); // true
@@ -98,6 +102,27 @@ $subscription = $user->activeSubscriptions()->first();
 $subscription = $subscription->swap('new_plan_id'); // updated subscription
 ```
 
+The plan swapping is done right now. If you wish to swap the plan after the current term ends, you can set `true` as a second parameter.
+```php
+$subscription = $subscription->swap('new_plan_id', true);
+```
+
+# Change plan quantity & billing cycles
+There are two methods that allows you to change plan quantity and the billing cycles.
+```php
+$subscription->changeQuantity(12);
+$subscription->changeBillingCycles(12);
+```
+
+Again, if you plan to do the change after the current term ends, pass `true` as second parameter.
+
+# Change trial end & ending term
+If you wish to change the trial date or the ending term, you can do it, but only if the plan is not cancelled. The parameter accepted can either be a valid date string or a Carbon instance.
+```php
+$subscription->changeTrialEnd(Carbon::create(...));
+$subscription->changeTermEnd(Carbon::create(...));
+```
+
 # Cancelling & Resuming subscriptions
 You can set your plans to be on trial. If you plan to cancel a subscription, you can do so using the `cancel()` method. However, if the subscription is not expired (the expiration date did not pass), it will still be available through the trial, but it would be marked as cancelled.
 ```php
@@ -124,6 +149,37 @@ However, the cancelled subscription can be `reactivated` instead of `resumed`:
 $subscription->reactivate();
 $subscription->active(); // true
 ```
+
+# Invoices
+Invoices are a legal way to track expenses made by the user. Chargeswarm allows you to get invoices from a subscription.
+```php
+$subscription->invoices(); // array with Chargebee_Invoice elements
+```
+
+Since invoices are paginated, you can specify a `$limit` and a `$nextOffset`.
+```
+$subscription->invoices($limit, $nextOffset);
+```
+
+You can also get the invoices by calling the method from your billable model, but you also require the subscription id.
+```
+$user->invoices($subscriptionId, $limit, $nextOffset);
+```
+
+Parsing invoices can be done in one way and thus you can also get the `$nextOffset` needed:
+```php
+$invoices = $user->invoices($subscriptionId, $limit, $nextOffset);
+
+foreach ($invoices as $invoice) {
+    $invoice = $invoice->invoice();
+
+    ...
+}
+
+$nextPageOfInvoices = $invoices->($subscriptionId, $limit, $invoices->nextOffset());
+```
+
+**Be careful, sometimes the offset doesn't exist. Make sure you validate it before.**
 
 # Webhooks
 Anytime something happens, Chargebee will send a `POST` request to a configured webhook. Fortunately, Chargeswarm can do this for you and has a ton of support when it comes to webhooks.

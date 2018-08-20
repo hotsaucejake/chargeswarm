@@ -19,11 +19,11 @@ trait Billable
      * @param string $subscriptionId
      * @param int $limit
      * @param string|null $nextOffset
-     * @return array
+     * @return null|Chargebee_ListResult
      */
     public function invoices(string $subscriptionId, int $limit = 20, $nextOffset = null)
     {
-        if (! $this->subscribed($subscriptionId)) {
+        if (! $this->subscriptions()->find($subscriptionId)) {
             return;
         }
 

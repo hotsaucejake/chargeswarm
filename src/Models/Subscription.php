@@ -36,7 +36,7 @@ class Subscription extends Model
      *
      * @param int $limit
      * @param string|null $nextOffset
-     * @return array
+     * @return Chargebee_ListResult
      */
     public function invoices(int $limit = 20, $nextOffset = null)
     {
@@ -48,13 +48,7 @@ class Subscription extends Model
             'next_offset' => $nextOffset,
         ]);
 
-        $invoicesArray = [];
-
-        foreach ($invoices as $invoice) {
-            $invoicesArray[] = $invoice->invoice();
-        }
-
-        return $invoicesArray;
+        return $invoices;
     }
 
     /**
@@ -110,7 +104,7 @@ class Subscription extends Model
 
         $subscription = ChargebeeSubscription::update($this->id, [
             'planQuantity' => $newQuantity,
-            'endOfTerm' => $endofTerm,
+            'endOfTerm' => $endOfTerm,
         ])->subscription();
 
         $this->update([
@@ -146,7 +140,7 @@ class Subscription extends Model
 
         $subscription = ChargebeeSubscription::update($this->id, [
             'billingCycles' => $billingCycles,
-            'endOfTerm' => $endofTerm,
+            'endOfTerm' => $endOfTerm,
         ])->subscription();
 
         $this->update([
@@ -168,21 +162,21 @@ class Subscription extends Model
     /**
      * Change the trial ending for a subscription.
      *
-     * @param string $date
+     * @param string|null $date
      * @return bool|\Rennokki\Chargeswarm\Models\Subscription
      */
     public function changeTrialEnd($date = null)
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if (! $this->active()) {
+        if (! $this->active() || ! $this->onTrial()) {
             return false;
         }
 
-        $date = ($date) ? Carbon::parse($date) : null;
+        $date = ($date && ! is_int($date)) ? Carbon::parse($date) : (is_int($date)) ? $date : null;
 
         $subscription = ChargebeeSubscription::update($this->id, [
-            'trialEnd' => $date->format('U'),
+            'trialEnd' => (is_int($date)) ? $date : $date->format('U'),
         ])->subscription();
 
         $this->update([
@@ -215,10 +209,10 @@ class Subscription extends Model
             return false;
         }
 
-        $date = ($date) ? Carbon::parse($date) : null;
+        $date = ($date && ! is_int($date)) ? Carbon::parse($date) : (is_int($date)) ? $date : null;
 
         $subscription = ChargebeeSubscription::changeTermEnd($this->id, [
-            'termEndsAt' => $date->format('U'),
+            'termEndsAt' => (is_int($date)) ? $date : $date->format('U'),
         ])->subscription();
 
         $this->update([

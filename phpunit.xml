@@ -22,6 +22,6 @@
     <php>
         <env name="CHARGEBEE_SITE" value=""/>
         <env name="CHARGEBEE_KEY" value=""/>
-        <env name="CHARGEBEE_GATEWAY" value="braintree"/>
+        <env name="CHARGEBEE_GATEWAY" value="stripe"/>
     </php>
 </phpunit>
