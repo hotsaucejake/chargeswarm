@@ -153,9 +153,6 @@ By default, the following controller methods automatically do the logic for your
 * `handlePaymentRefunded`
 * `handleSubscriptionDeleted`
 * `handleSubscriptionRenewed`
-* `handleInvoiceGenerated`
-* `handleInvoiceCreated`
-* `handleInvoiceDeleted`
 
 For these four, instead, i recommend listening their **paired events** to handle your own logic. In case you want to implement any other handler, you are free to do it by extending the controller, but remember that events associated with the hooks are also triggered.
 

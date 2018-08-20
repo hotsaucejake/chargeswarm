@@ -2,7 +2,9 @@
 
 namespace Rennokki\Chargeswarm\Traits;
 
+use Chargebee_Invoice as ChargebeeInvoice;
 use Rennokki\Chargeswarm\SubscriptionBuilder;
+use ChargeBee_Environment as ChargebeeEnvironment;
 
 trait Billable
 {
@@ -11,26 +13,38 @@ trait Billable
         return $this->morphMany(config('chargeswarm.models.subscription'), 'model');
     }
 
-    public function invoices()
-    {
-        return $this->morphMany(config('chargeswarm.models.invoice'), 'model');
-    }
-
     /**
-     * Get the the invoice, if any.
+     * Get all invoices associated with a subscription.
      *
-     * @param string $invoiceId
-     * @return null|Chargebee_Invoice
+     * @param string $subscriptionId
+     * @param int $limit
+     * @param string|null $nextOffset
+     * @return array
      */
-    public function retrieveInvoice(string $invoiceId)
+    public function invoices(string $subscriptionId, int $limit = 20, $nextOffset = null)
     {
-        $invoice = $this->invoices()->find($invoiceId);
-
-        if (! $invoice) {
+        if (! $this->subscribed($subscriptionId)) {
             return;
         }
 
-        return $invoice->retrieve();
+        $subscription = $this->subscriptions()->find($subscriptionId);
+
+        return $subscription->invoices($limit, $nextOffset);
+    }
+
+    /**
+     * Get the invoice.
+     *
+     * @param string $invoiceId
+     * @return Chargebee_Invoice
+     */
+    public function invoice(string $invoiceId)
+    {
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+
+        $invoice = ChargebeeInvoice::retrieve($invoiceId);
+
+        return $invoice->invoice();
     }
 
     /**
@@ -39,15 +53,13 @@ trait Billable
      * @param string $invoiceId
      * @return null|Chargebee_Download
      */
-    public function downloadLinkForInvoice(string $invoiceId)
+    public function downloadInvoice(string $invoiceId)
     {
-        $invoice = $this->invoices()->find($invoiceId);
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
 
-        if (! $invoice) {
-            return;
-        }
+        $invoice = ChargebeeInvoice::pdf($invoiceId);
 
-        return $invoice->downloadLink();
+        return $invoice->download();
     }
 
     /**

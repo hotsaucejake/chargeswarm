@@ -199,18 +199,14 @@ class SubscriptionTest extends TestCase
 
         $activeSubscriptions = $user->activeSubscriptions();
         $subscription = $activeSubscriptions->first();
+        $invoices = $subscription->invoices();
 
-        $this->assertEquals($subscription->invoices()->count(), 1);
-        $this->assertEquals($user->invoices()->count(), 1);
+        $this->assertTrue(is_array($invoices));
+        $this->assertEquals(count($invoices), 1);
 
-        $invoice = $subscription->invoices()->first();
-        $this->assertTrue($invoice->subscription()->first()->is($subscription));
-        $this->assertInstanceOf(ChargebeeInvoice::class, $invoice->retrieve());
-        $this->assertInstanceOf(ChargebeeDownload::class, $invoice->downloadLink());
-        $this->assertInstanceOf(ChargebeeInvoice::class, $user->retrieveInvoice($invoice->id));
-        $this->assertInstanceOf(ChargebeeDownload::class, $user->downloadLinkForInvoice($invoice->id));
+        $invoice = $invoices[0];
 
-        $this->assertNull($user->retrieveInvoice(9999999999));
-        $this->assertNull($user->downloadLinkForInvoice(9999999999));
+        $this->assertInstanceOf(ChargebeeInvoice::class, $user->invoice($invoice->id));
+        $this->assertInstanceOf(ChargebeeDownload::class, $user->downloadInvoice($invoice->id));
     }
 }

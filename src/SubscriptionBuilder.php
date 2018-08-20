@@ -2,6 +2,7 @@
 
 namespace Rennokki\Chargeswarm;
 
+use Carbon\Carbon;
 use ChargeBee_Environment as ChargebeeEnvironment;
 use ChargeBee_Subscription as ChargebeeSubscription;
 
@@ -14,6 +15,9 @@ class SubscriptionBuilder
     protected $billingCycles = 1;
     protected $quantity = 1;
     protected $affiliateToken = null;
+    protected $startDate = null;
+    protected $trialEnd = null;
+    protected $trial = false;
 
     protected $customerEmail;
     protected $customerFirstName;
@@ -30,6 +34,8 @@ class SubscriptionBuilder
     protected $billingCountry;
     protected $billingCompany;
 
+    protected $invoiceNotes = null;
+
     public function __construct($model = null, $planId = null)
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
@@ -38,6 +44,51 @@ class SubscriptionBuilder
         $this->planId = $planId;
 
         $this->addons = collect($this->addons);
+    }
+
+    /**
+     * Set a default starting date.
+     *
+     * @param string|null $date
+     * @return \Rennokki\Chargeswarm\SubscriptionBuilder
+     */
+    public function startsOn($date = null)
+    {
+        $this->startDate = (! is_null($date)) ? Carbon::parse($date) : null;
+
+        return $this;
+    }
+
+    /**
+     * Overwrite the settings and start this subscription as trial.
+     *
+     * @return \Rennokki\Chargeswarm\SubscriptionBuilder
+     */
+    public function onTrial()
+    {
+        $this->trial = true;
+
+        return $this;
+    }
+
+    /**
+     * Overwrite the settings and specify a trial ending date.
+     *
+     * @param string|null $date
+     * @return \Rennokki\Chargeswarm\SubscriptionBuilder
+     */
+    public function trialEndsOn($date = null)
+    {
+        $this->trialEnd = (! is_null($date)) ? Carbon::parse($date) : null;
+
+        return $this;
+    }
+
+    public function withInvoiceNotes($notes = null)
+    {
+        $this->invoiceNotes = $notes;
+
+        return $this;
     }
 
     /**
@@ -183,17 +234,6 @@ class SubscriptionBuilder
             'last_four' => ($card) ? $card->last4 : null,
         ]);
 
-        if ($invoice) {
-            $storedInvoice = $this->model->invoices()->find($invoice->id);
-
-            if (! $storedInvoice) {
-                $storedInvoice = $this->model->invoices()->create([
-                    'id' => $invoice->id,
-                    'subscription_id' => $subscription->id,
-                ]);
-            }
-        }
-
         return $storedSubscription;
     }
 
@@ -240,6 +280,9 @@ class SubscriptionBuilder
         }
 
         $subscription->put('affiliateToken', $this->affiliateToken);
+        $subscription->put('invoiceNotes', $this->invoiceNotes);
+        $subscription->put('startDate', ($this->startDate) ? $this->startDate->format('U') : null);
+        $subscription->put('trialEnd', ($this->trialEnd) ? $this->trialEnd->format('U') : null);
 
         return $subscription;
     }

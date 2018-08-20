@@ -92,19 +92,6 @@ class ChargebeeWebhookController extends Controller
                 'next_billing_at' => $subscription->next_billing_at,
                 'status' => $subscription->status,
             ]);
-
-            if (optional($payload->content)->invoice) {
-                $invoice = $payload->content->invoice;
-                $storedInvoice = $subscription->invoices()->find($invoice->id);
-
-                if (! $storedInvoice) {
-                    $storedSubscription->invoices()->create([
-                        'id' => $invoice->id,
-                        'model_id' => $storedSubscription->model_id,
-                        'model_type' => $storedSubscription->model_type,
-                    ]);
-                }
-            }
         }
 
         return response('Webhook handled successfully.', 200);
@@ -133,19 +120,6 @@ class ChargebeeWebhookController extends Controller
                 'next_billing_at' => $subscription->next_billing_at,
                 'status' => $subscription->status,
             ]);
-
-            if (optional($payload->content)->invoice) {
-                $invoice = $payload->content->invoice;
-                $storedInvoice = $subscription->invoices()->find($invoice->id);
-
-                if (! $storedInvoice) {
-                    $storedSubscription->invoices()->create([
-                        'id' => $invoice->id,
-                        'model_id' => $storedSubscription->model_id,
-                        'model_type' => $storedSubscription->model_type,
-                    ]);
-                }
-            }
         }
 
         return response('Webhook handled successfully.', 200);
@@ -162,7 +136,6 @@ class ChargebeeWebhookController extends Controller
     public function handleSubscriptionDeleted($payload, $storedSubscription, $subscription)
     {
         if ($storedSubscription) {
-            $storedSubscription->invoices()->delete();
             $storedSubscription->usages()->delete();
 
             $storedSubscription->delete();
@@ -194,99 +167,6 @@ class ChargebeeWebhookController extends Controller
                 'next_billing_at' => $subscription->next_billing_at,
                 'status' => $subscription->status,
             ]);
-
-            if (optional($payload->content)->invoice) {
-                $invoice = $payload->content->invoice;
-                $storedInvoice = $subscription->invoices()->find($invoice->id);
-
-                if (! $storedInvoice) {
-                    $storedSubscription->invoices()->create([
-                        'id' => $invoice->id,
-                        'model_id' => $storedSubscription->model_id,
-                        'model_type' => $storedSubscription->model_type,
-                    ]);
-                }
-            }
-        }
-
-        return response('Webhook handled successfully.', 200);
-    }
-
-    /**
-     * Handle invoice generation.
-     *
-     * @param $payload The payload, in JSON Object, from the webhook.
-     * @param $storedSubscription The stored subscription in the database, if any.
-     * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
-     */
-    public function handleInvoiceGenerated($payload, $storedSubscription, $subscription)
-    {
-        if ($storedSubscription) {
-            if (optional($payload->content)->invoice) {
-                $invoice = $payload->content->invoice;
-                $storedInvoice = $subscription->invoices()->find($invoice->id);
-
-                if (! $storedInvoice) {
-                    $storedSubscription->invoices()->create([
-                        'id' => $invoice->id,
-                        'model_id' => $storedSubscription->model_id,
-                        'model_type' => $storedSubscription->model_type,
-                    ]);
-                }
-            }
-        }
-
-        return response('Webhook handled successfully.', 200);
-    }
-
-    /**
-     * Handle pending invoice generation.
-     *
-     * @param $payload The payload, in JSON Object, from the webhook.
-     * @param $storedSubscription The stored subscription in the database, if any.
-     * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
-     */
-    public function handlePendingInvoiceCreated($payload, $storedSubscription, $subscription)
-    {
-        if ($storedSubscription) {
-            if (optional($payload->content)->invoice) {
-                $invoice = $payload->content->invoice;
-                $storedInvoice = $subscription->invoices()->find($invoice->id);
-
-                if (! $storedInvoice) {
-                    $storedSubscription->invoices()->create([
-                        'id' => $invoice->id,
-                        'model_id' => $storedSubscription->model_id,
-                        'model_type' => $storedSubscription->model_type,
-                    ]);
-                }
-            }
-        }
-
-        return response('Webhook handled successfully.', 200);
-    }
-
-    /**
-     * Handle invoice deletion.
-     *
-     * @param $payload The payload, in JSON Object, from the webhook.
-     * @param $storedSubscription The stored subscription in the database, if any.
-     * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
-     */
-    public function handleInvoiceDeleted($payload, $storedSubscription, $subscription)
-    {
-        if ($storedSubscription) {
-            if (optional($payload->content)->invoice) {
-                $invoice = $payload->content->invoice;
-                $storedInvoice = $subscription->invoices()->find($invoice->id);
-
-                if ($storedInvoice) {
-                    $storedInvoice->delete();
-                }
-            }
         }
 
         return response('Webhook handled successfully.', 200);

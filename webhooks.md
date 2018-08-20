@@ -24,6 +24,3 @@
 | @handleSubscriptionShippingAddressUpdated       | \Rennokki\Chargeswarm\Events\SubscriptionShippingAddressUpdated::class       |
 | @handleSubscriptionStarted                      | \Rennokki\Chargeswarm\Events\SubscriptionStarted::class                      |
 | @handleSubscriptionTrialEndReminder             | \Rennokki\Chargeswarm\Events\SubscriptionTrialEndReminder::class             |
-| @handleInvoiceGenerated*                        | \Rennokki\Chargeswarm\Events\InvoiceGenerated::class                         |
-| @handlePendingInvoiceCreated*                   | \Rennokki\Chargeswarm\Events\PendingInvoiceCreated::class                    |
-| @handleInvoiceDeleted*                          | \Rennokki\Chargeswarm\Events\InvoiceDeleted::class                           |
