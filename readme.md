@@ -176,7 +176,20 @@ foreach ($invoices as $invoice) {
     ...
 }
 
-$nextPageOfInvoices = $invoices->($subscriptionId, $limit, $invoices->nextOffset());
+$nextPageOfInvoices = $user->invoices($subscriptionId, $limit, $invoices->nextOffset());
+```
+
+You can also gather invoices directly form a subscription, with the same method for offsetting:
+```php
+$invoices = $subscription->invoices($limit, $nextOffset);
+
+foreach ($invoices as $invoice) {
+    $invoice = $invoice->invoice();
+
+    ...
+}
+
+$nextPageOfInvoices = $subscription->invoices($limit, $invoices->nextOffset());
 ```
 
 **Be careful, sometimes the offset doesn't exist. Make sure you validate it before.**
