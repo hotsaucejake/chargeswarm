@@ -11,6 +11,8 @@
 # Laravel Chargeswarm
 Laravel Chargeswarm is a Laravel Cashier-alike package that will help you befriend the bees and have a great SaaS system for your app. This package provides methods to create, update, cancel or resume subscriptions and also to handle the webhooks in style!
 
+Also, Chargeswarm provides [support to handle countable resources](https://github.com/rennokki/chargeswarm#countable-features). For this, it's recommended to use [Chargebee's Metadata](https://www.chargebee.com/docs/metadata.html), with or without webhooks.
+
 # Advantages of Chargebee
 Chargebee is not a payment provider. In fact, Chargebee is a manager for SaaS, while you can use any kind of payment gateway. The same as Stripe, you can fully use features like [Chargebee's metadata](https://www.chargebee.com/docs/metadata.html) to carry out information for your plans.
 
@@ -288,6 +290,7 @@ class MyListener {
         // $event->payload
         // $event->storedSubscription
         // $event->subscription
+        // $event->plan
     }
 }
 ```
