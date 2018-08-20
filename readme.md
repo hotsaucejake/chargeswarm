@@ -181,6 +181,13 @@ $nextPageOfInvoices = $invoices->($subscriptionId, $limit, $invoices->nextOffset
 
 **Be careful, sometimes the offset doesn't exist. Make sure you validate it before.**
 
+# Plan
+To retrieve the plan the current subscription has, you can call `plan()`. This allows you to handle metadata from a specific plan, which your subscription belongs to.
+```php
+$plan = $subscription->plan();
+$metadata = $plan->metaData(); // json
+```
+
 # Webhooks
 Anytime something happens, Chargebee will send a `POST` request to a configured webhook. Fortunately, Chargeswarm can do this for you and has a ton of support when it comes to webhooks.
 
@@ -197,9 +204,9 @@ protected $except = [
 ```
 
 # Pre-defined webhooks
-There are 27 events & pre-defined webhooks, but you can extend it using [any of the Chargebee's events](https://apidocs.chargebee.com/docs/api/events#event_types) due to friendly syntax that will be explained later. Each time a webhook fires, no matter the event, you will receive a `\Rennokki\Chargeswarm\Events\WebhookReceived` event that carries out as variable an `$event->payload` JSON object.
+There are more than 20 pre-defined events & webhooks, but you can extend it using [any of the Chargebee's events](https://apidocs.chargebee.com/docs/api/events#event_types) due to friendly syntax that will be explained later. Each time a webhook fires, no matter the event, you will receive a `\Rennokki\Chargeswarm\Events\WebhookReceived` event that carries out as variable an `$event->payload` JSON object.
 
-Additionally, for these 23 pre-defined webhooks, you will also receive a specific event. You can find a list of [pre-defined webhooks and their paired events here](webhooks.md).
+Additionally, for these pre-defined webhooks, you will also receive a specific event. You can find a list of [pre-defined webhooks and their paired events here](webhooks.md).
 
 Unfortunately, for any other class method you declare, other than those defined earlier, you will not receive events. The only event that triggers is the `\Rennokki\Chargeswarm\Events\WebhookReceived` event, which triggers automatically on each webhook received.
 
@@ -219,11 +226,12 @@ use Rennokki\Chargeswarm\Http\Controllers\ChargebeeWebhookController;
 
 class MyController extends ChargebeeWebhookController
 {
-    public function handleSubscriptionResumed($payload, $storedSubscription, $subscription)
+    public function handleSubscriptionResumed($payload, $storedSubscription, $subscription, $plan)
     {
         // $payload is the JSON Object with the request
         // $storedSubscription is the stored subscription (if any)
         // $subscription is the subscription data (equivalent of $payload->content->subscription), if any
+        // $plan is the plan object of the subscription
     }
 }
 ```
@@ -241,23 +249,23 @@ MyController@handle{EventNameInStudlyCase}($payload, $storedSubscription, $subsc
 
 For example, since `card_added` Chargebee event is not pre-defined nor added, you can simply add this method in your controller:
 ```php
-public function handleCardAdded($payload, $storedSubscription, $subscription)
+public function handleCardAdded($payload, $storedSubscription, $subscription, $plan)
 {
     // your logic here
     // only $payload is not null.
-    // The rest of the variables injected can be null or not, if the 
+    // The rest of the variables injected can be null or not, if the
     // subscription object exists
 }
 ```
 
-All controller methods and events accept 3 parameters: `$payload`, `$storedSubscription` and `$subscription`.
+All controller methods and events accept 4 parameters: `$payload`, `$storedSubscription`, `$subscription` and `$plan`.
 
 # Events
 As stated earlier, the `\Rennokki\Chargeswarm\Events\WebhookReceived` event fires automatically. In addition to that, [each of the listed method here automatically fires the paired event](webhooks.md).
 
 If you are not familiar with events, [check Laravel's Official Documentation on Events](https://laravel.com/docs/5.6/events) that teaches you what are events, how to handle them and, more important, how to listen to them.
 
-All events send 3 parameters to their listeners: `$payload`, `$storedSubscription` and `$subscription`. They can be accessed in your listener using the event instance.
+All events send 4 parameters to their listeners: `$payload`, `$storedSubscription`, `$subscription` and `$plan`. They can be accessed in your listener using the event instance.
 
 For example, each time the `@handleSubscriptionResumed` is called, we can listen to the `\Rennokki\Chargeswarm\Events\SubscriptionResumed` event and implement our logic:
 ```php
@@ -280,7 +288,6 @@ public function handle()
 {
     $subscription = $event->storedSubscription;
     $subscription->createUsage('monthly.emails', 5000);
-    
     ...
 }
 ```

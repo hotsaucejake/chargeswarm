@@ -3,6 +3,7 @@
 namespace Rennokki\Chargeswarm\Test;
 
 use Carbon\Carbon;
+use Chargebee_Plan as ChargebeePlan;
 use Chargebee_Invoice as ChargebeeInvoice;
 use Chargebee_Download as ChargebeeDownload;
 use Chargebee_ListResult as ChargebeeListResult;
@@ -221,6 +222,10 @@ class SubscriptionTest extends TestCase
         $activeSubscriptions = $user->activeSubscriptions();
         $subscription = $activeSubscriptions->first();
         $invoices = $subscription->invoices();
+        $plan = $subscription->plan();
+
+        $this->assertInstanceOf(ChargebeePlan::class, $plan);
+        $this->assertEquals($subscription->plan_id, $plan->id);
 
         $this->assertInstanceOf(ChargebeeListResult::class, $invoices);
         $this->assertEquals($invoices->count(), 1);

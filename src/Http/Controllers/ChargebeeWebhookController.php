@@ -20,23 +20,25 @@ class ChargebeeWebhookController extends Controller
 
         $subscription = optional($payload->content)->subscription;
         $storedSubscription = null;
+        $plan = null;
 
         $subscriptionModel = config('chargeswarm.models.subscription');
 
         if ($subscription) {
             $storedSubscription = $subscriptionModel::find($subscription->id);
+            $plan = $storedSubscription->plan();
         }
 
         $eventClass = '\Rennokki\Chargeswarm\Events\/'.$event;
 
         if (class_exists($eventClass)) {
-            event(new $eventClass($payload, $storedSubscription, $subscription));
+            event(new $eventClass($payload, $storedSubscription, $subscription, $plan));
         }
 
-        event(new \Rennokki\Chargeswarm\Events\WebhookReceived($payload));
+        event(new \Rennokki\Chargeswarm\Events\WebhookReceived($payload, $storedSubscription, $subscription, $plan));
 
         if (method_exists($this, 'handle'.$event)) {
-            $this->{ 'handle'.$event}($payload, $storedSubscription, $subscription);
+            $this->{ 'handle'.$event}($payload, $storedSubscription, $subscription, $plan);
         }
 
         return response('The webhook was handled for '.$request->event_type, 200);
@@ -48,9 +50,10 @@ class ChargebeeWebhookController extends Controller
      * @param $payload The payload, in JSON Object, from the webhook.
      * @param $storedSubscription The stored subscription in the database, if any.
      * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
+     * @param $plan The plan of the subscription, if any.
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function handleSubscriptionCancelled($payload, $storedSubscription, $subscription)
+    public function handleSubscriptionCancelled($payload, $storedSubscription, $subscription, $plan)
     {
         if ($storedSubscription) {
             $storedSubscription->update([
@@ -75,9 +78,10 @@ class ChargebeeWebhookController extends Controller
      * @param $payload The payload, in JSON Object, from the webhook.
      * @param $storedSubscription The stored subscription in the database, if any.
      * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
+     * @param $plan The plan of the subscription, if any.
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function handlePaymentSucceeded($payload, $storedSubscription, $subscription)
+    public function handlePaymentSucceeded($payload, $storedSubscription, $subscription, $plan)
     {
         if ($storedSubscription) {
             $storedSubscription->update([
@@ -103,9 +107,10 @@ class ChargebeeWebhookController extends Controller
      * @param $payload The payload, in JSON Object, from the webhook.
      * @param $storedSubscription The stored subscription in the database, if any.
      * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
+     * @param $plan The plan of the subscription, if any.
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function handlePaymentRefunded($payload, $storedSubscription, $subscription)
+    public function handlePaymentRefunded($payload, $storedSubscription, $subscription, $plan)
     {
         if ($storedSubscription) {
             $storedSubscription->update([
@@ -131,9 +136,10 @@ class ChargebeeWebhookController extends Controller
      * @param $payload The payload, in JSON Object, from the webhook.
      * @param $storedSubscription The stored subscription in the database, if any.
      * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
+     * @param $plan The plan of the subscription, if any.
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function handleSubscriptionDeleted($payload, $storedSubscription, $subscription)
+    public function handleSubscriptionDeleted($payload, $storedSubscription, $subscription, $plan)
     {
         if ($storedSubscription) {
             $storedSubscription->usages()->delete();
@@ -150,9 +156,10 @@ class ChargebeeWebhookController extends Controller
      * @param $payload The payload, in JSON Object, from the webhook.
      * @param $storedSubscription The stored subscription in the database, if any.
      * @param $subscription The subscription came from the webhook (same as $payload->content->subscription)
+     * @param $plan The plan of the subscription, if any.
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
      */
-    public function handleSubscriptionRenewed($payload, $storedSubscription, $subscription)
+    public function handleSubscriptionRenewed($payload, $storedSubscription, $subscription, $plan)
     {
         if ($storedSubscription) {
             $storedSubscription->update([

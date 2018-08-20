@@ -3,6 +3,7 @@
 namespace Rennokki\Chargeswarm\Models;
 
 use Carbon\Carbon;
+use Chargebee_Plan as ChargebeePlan;
 use Illuminate\Database\Eloquent\Model;
 use Chargebee_Invoice as ChargebeeInvoice;
 use ChargeBee_Environment as ChargebeeEnvironment;
@@ -49,6 +50,20 @@ class Subscription extends Model
         ]);
 
         return $invoices;
+    }
+
+    /**
+     * Get the plan from the API for this subscription.
+     *
+     * @return Chargebee_Plan
+     */
+    public function plan()
+    {
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+
+        $plan = ChargebeePlan::retrieve($this->plan_id);
+
+        return $plan->plan();
     }
 
     /**
