@@ -26,7 +26,10 @@ class ChargebeeWebhookController extends Controller
 
         if ($subscription) {
             $storedSubscription = $subscriptionModel::find($subscription->id);
-            $plan = $storedSubscription->plan();
+
+            if ($storedSubscription) {
+                $plan = $storedSubscription->plan();
+            }
         }
 
         $eventClass = '\Rennokki\Chargeswarm\Events\/'.$event;
