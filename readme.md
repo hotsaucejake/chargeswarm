@@ -185,7 +185,7 @@ $nextPageOfInvoices = $invoices->($subscriptionId, $limit, $invoices->nextOffset
 To retrieve the plan the current subscription has, you can call `plan()`. This allows you to handle metadata from a specific plan, which your subscription belongs to.
 ```php
 $plan = $subscription->plan();
-$metadata = $plan->metaData(); // json
+$metadata = $plan->metaData; // json object
 ```
 
 # Webhooks
