@@ -40,7 +40,7 @@ trait Billable
      */
     public function invoice(string $invoiceId)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         $invoice = ChargebeeInvoice::retrieve($invoiceId);
 
@@ -55,7 +55,7 @@ trait Billable
      */
     public function downloadInvoice(string $invoiceId)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         $invoice = ChargebeeInvoice::pdf($invoiceId);
 

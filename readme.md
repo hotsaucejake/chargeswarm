@@ -18,6 +18,16 @@ Chargebee is not a payment provider. In fact, Chargebee is a manager for SaaS, w
 
 This package also supports tracking consumption for countable features. Stay tuned until the end of the documentation to know what's all about.
 
+# Upgrading from 1.2.* to 1.3.*
+The 1.3 version uses config file's array to retrieve the env variables, instead of a "raw" pass.
+
+In your `chargeswarm.php` file, add the following lines:
+```php
+'site' => env('CHARGEBEE_SITE', ''),
+'key' => env('CHARGEBEE_KEY', ''),
+'gateway' => env('CHARGEBEE_GATEWAY', ''),
+```
+
 # Installation
 Install the package:
 ```bash

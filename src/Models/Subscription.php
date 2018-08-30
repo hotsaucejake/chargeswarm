@@ -41,7 +41,7 @@ class Subscription extends Model
      */
     public function invoices(int $limit = 20, $nextOffset = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         $invoices = ChargebeeInvoice::all([
             'subscriptionId[is]' => $this->id,
@@ -59,7 +59,7 @@ class Subscription extends Model
      */
     public function plan()
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         $plan = ChargebeePlan::retrieve($this->plan_id);
 
@@ -75,7 +75,7 @@ class Subscription extends Model
      */
     public function swap(string $planId, $endOfTerm = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active()) {
             return false;
@@ -111,7 +111,7 @@ class Subscription extends Model
      */
     public function changeQuantity(int $newQuantity, $endOfTerm = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active()) {
             return false;
@@ -147,7 +147,7 @@ class Subscription extends Model
      */
     public function updateBillingCycles($billingCycles, $endOfTerm = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active()) {
             return false;
@@ -182,7 +182,7 @@ class Subscription extends Model
      */
     public function changeTrialEnd($date = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active() || ! $this->onTrial()) {
             return false;
@@ -218,7 +218,7 @@ class Subscription extends Model
      */
     public function changeTermEnd($date = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active()) {
             return false;
@@ -253,7 +253,7 @@ class Subscription extends Model
      */
     public function cancel()
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active() || ! $this->onTrial()) {
             return false;
@@ -287,7 +287,7 @@ class Subscription extends Model
      */
     public function cancelImmediately()
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->active()) {
             return false;
@@ -319,7 +319,7 @@ class Subscription extends Model
      */
     public function resume()
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         $subscription = ChargebeeSubscription::removeScheduledCancellation($this->id)->subscription();
 
@@ -347,7 +347,7 @@ class Subscription extends Model
      */
     public function reactivate()
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         if (! $this->cancelled()) {
             return false;

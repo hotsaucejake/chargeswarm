@@ -38,7 +38,7 @@ class SubscriptionBuilder
 
     public function __construct($model = null, $planId = null)
     {
-        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: env('CHARGEBEE_SITE', ''), (getenv('CHARGEBEE_KEY')) ?: env('CHARGEBEE_KEY', ''));
+        ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
         $this->model = $model;
         $this->planId = $planId;
@@ -274,7 +274,7 @@ class SubscriptionBuilder
 
         if ($cardToken) {
             $subscription->put('card', [
-                'gateway' => (getenv('CHARGEBEE_GATEWAY')) ?: env('CHARGEBEE_GATEWAY', ''),
+                'gateway' => (getenv('CHARGEBEE_GATEWAY')) ?: config('chargeswarm.gateway'),
                 'tmpToken' => $cardToken,
             ]);
         }
