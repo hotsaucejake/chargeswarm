@@ -255,7 +255,7 @@ class Subscription extends Model
     {
         ChargebeeEnvironment::configure((getenv('CHARGEBEE_SITE')) ?: config('chargeswarm.site'), (getenv('CHARGEBEE_KEY')) ?: config('chargeswarm.key'));
 
-        if (! $this->active() || ! $this->onTrial()) {
+        if (! $this->active() && ! $this->onTrial()) {
             return false;
         }
 
